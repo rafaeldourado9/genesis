@@ -50,7 +50,7 @@ Com base nas respostas do Bloco 1, adapte as perguntas:
 ### Bloco 3 — Entidades e fluxos principais
 
 ```
-9. Quais são as 5-10 entidades principais? (ex: Usuário, Pedido, Produto, Câmera)
+9. Quais são as 5-10 entidades principais? (ex: Usuário, Pedido, Produto, Projeto, Relatório)
 10. Me descreva o fluxo principal de uso — do início ao fim, do ponto de vista do usuário
 11. Tem algum fluxo assíncrono importante? (processamento em background, notificações, etc)
 ```
@@ -163,12 +163,12 @@ N. {resultado}
 **Prazo MVP:** {data ou "indefinido"}
 **Tamanho do time:** {n pessoas}
 **Orçamento infra/mês:** {R$/$/€ ou "indefinido"}
-**Compliance:** {LGPD / GDPR / nenhum / etc}
+**Compliance:** {GDPR / HIPAA / PCI-DSS / SOC2 / nenhum / etc}
 
 ## Requisitos Não-Funcionais
 
 - **Segurança:** {nível — básico / avançado / enterprise}
-- **LGPD/Privacidade:** {sim precisa / não se aplica}
+- **Privacidade/Dados pessoais:** {sim precisa / não se aplica}
 - **Auditoria:** {sim / não}
 - **Internacionalização:** {pt-BR apenas / multi-idioma}
 - **Acessibilidade:** {WCAG / sem requisito formal}

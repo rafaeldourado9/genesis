@@ -50,18 +50,18 @@ Para cada endpoint, verificar:
 - [ ] Request body validado
 - [ ] Response shape corresponde ao schema
 
-### 2. Isolamento de Tenant (crítico para multi-tenant)
+### 2. Isolamento de dados (se o projeto for multi-tenant)
+
+Se o manifest define isolamento por organização/tenant, verificar:
 
 ```bash
-# Verificar se TODA query tem filtro de tenant
-# Python/SQLAlchemy
-grep -rn "select\|Select\|query\(" src/ --include="*.py" | grep -v "tenant_id"
-
-# TypeORM
-grep -rn "\.find\|\.findOne\|\.createQueryBuilder" src/ --include="*.ts" | grep -v "tenantId\|tenant_id"
+# Confirmar que toda query filtra pelo campo de organização
+# (o nome do campo vem do manifest — org_id, workspace_id, account_id, etc.)
+grep -rn "select\|Select\|query\(" src/ --include="*.py" | grep -v "org_id\|account_id"
+grep -rn "\.find\|\.findOne\|\.createQueryBuilder" src/ --include="*.ts" | grep -v "orgId\|accountId"
 ```
 
-❌ Qualquer query sem filtro de tenant é um bug de segurança crítico.
+❌ Se o projeto isola dados por organização, query sem esse filtro é bug de segurança crítico.
 
 ### 3. RBAC
 
@@ -145,7 +145,7 @@ Auditor: genesis-guard
 | Categoria | Status | Issues |
 |-----------|--------|--------|
 | Contratos de API | {✅/⚠️/❌} | {N} issues |
-| Isolamento de tenant | {✅/⚠️/❌} | {N} issues |
+| Isolamento de dados (se multi-tenant) | {✅/⚠️/N/A} | {N} issues |
 | RBAC | {✅/⚠️/❌} | {N} issues |
 | Padrões de código | {✅/⚠️/❌} | {N} issues |
 | Schema do banco | {✅/⚠️/❌} | {N} issues |
@@ -154,15 +154,10 @@ Auditor: genesis-guard
 
 ## Issues Críticos (bloqueiam o merge) ❌
 
-### [CRITIC-001] Query sem filtro tenant
-**Onde:** `src/users/repository.py:45`
-**Problema:** `select(User)` sem `.where(User.tenant_id == tenant_id)`
-**Correção:** Adicionar filtro de tenant em todas as queries
-
-### [CRITIC-002] Endpoint sem autenticação
+### [CRITIC-001] Endpoint sem autenticação
 **Onde:** `src/orders/router.py:23`
-**Problema:** `@router.get("/")` sem `Depends(require_role(...))`
-**Correção:** Adicionar autenticação
+**Problema:** `@router.get("/")` sem guard de autenticação
+**Correção:** Adicionar autenticação obrigatória
 
 ## Issues Importantes (devem ser corrigidos logo) ⚠️
 
@@ -204,8 +199,8 @@ Auditor: genesis-guard
 
 | Condição | Aprovado? |
 |----------|-----------|
-| Zero queries sem tenant filter (multi-tenant) | obrigatório |
-| Zero endpoints sem auth (onde requerido) | obrigatório |
+| Zero endpoints sem auth (onde requerido pelo manifest) | obrigatório |
+| Isolamento de dados implementado (se projeto for multi-tenant) | obrigatório |
 | Zero credenciais hardcoded | obrigatório |
 | Cobertura >= {mínimo definido} | obrigatório |
 | Zero falhas em testes | obrigatório |

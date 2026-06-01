@@ -299,11 +299,11 @@ graph TB
 {
   "event_type": "user.created",
   "aggregate_id": "uuid",
-  "tenant_id": "uuid",
   "occurred_at": "ISO8601",
   "payload": {}
 }
 ```
+> Se o projeto for multi-tenant, adicionar `"org_id": "uuid"` no envelope.
 
 ### Naming de eventos
 **Padrão:** `{dominio}.{entidade}.{acao}`

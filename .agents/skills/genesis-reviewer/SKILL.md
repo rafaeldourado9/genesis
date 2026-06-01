@@ -131,14 +131,6 @@ async def get_users(service: UserService = Depends(get_user_service)):
 ```
 
 ```python
-# ❌ Query sem filtro tenant
-users = await db.execute(select(User))  # retorna de todos os tenants!
-
-# ✅ Sempre filtrar por tenant
-users = await db.execute(select(User).where(User.tenant_id == current_user.tenant_id))
-```
-
-```python
 # ❌ Senha em log
 logger.info(f"Login attempt for {email} with password {password}")
 
@@ -170,11 +162,11 @@ const user = await userService.findById(id).catch(err => {
 
 ```
 # ❌ Magic number
-if (count > 400) throw new Error("Limit exceeded")
+if (retries > 3) throw new Error("Too many retries")
 
-# ✅ Constante nomeada
-const CAMERA_LIMIT_PER_TENANT = 400
-if (count > CAMERA_LIMIT_PER_TENANT) throw new LimitExceededException(...)
+# ✅ Constante nomeada com contexto
+const MAX_RETRY_ATTEMPTS = 3
+if (retries > MAX_RETRY_ATTEMPTS) throw new RetryLimitExceededException(...)
 ```
 
 ---

@@ -39,32 +39,38 @@ erDiagram
         uuid id PK
         string email UK
         string password_hash
-        enum role "admin|user|operator"
-        uuid tenant_id FK
+        enum role "admin|user|guest"
+        boolean is_active
         timestamp created_at
         timestamp updated_at
     }
 
-    TENANT {
-        uuid id PK
-        string name
-        string slug UK
-        boolean is_active
-        timestamp created_at
-    }
-
-    USER }|--|| TENANT : "belongs to"
-
     ORDER {
         uuid id PK
         uuid user_id FK
-        uuid tenant_id FK
         enum status "pending|confirmed|cancelled"
         decimal total_amount
         timestamp created_at
     }
 
+    ORDER_ITEM {
+        uuid id PK
+        uuid order_id FK
+        uuid product_id FK
+        int quantity
+        decimal unit_price
+    }
+
+    PRODUCT {
+        uuid id PK
+        string name
+        decimal price
+        int stock
+    }
+
     USER ||--o{ ORDER : "places"
+    ORDER ||--o{ ORDER_ITEM : "contains"
+    ORDER_ITEM }o--|| PRODUCT : "references"
 ```
 
 ## Cardinalidades Justificadas
@@ -91,42 +97,23 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";  -- se necessário
 
 -- ============================================================
--- TENANTS
--- ============================================================
-CREATE TABLE tenants (
-    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name        VARCHAR(255)    NOT NULL,
-    slug        VARCHAR(100)    NOT NULL UNIQUE,
-    is_active   BOOLEAN         NOT NULL DEFAULT TRUE,
-    created_at  TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMPTZ     NOT NULL DEFAULT NOW()
-);
-
--- Índices
-CREATE INDEX idx_tenants_slug ON tenants(slug);
-
--- ============================================================
 -- USERS
 -- ============================================================
 CREATE TABLE users (
     id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id       UUID        NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    email           VARCHAR(255) NOT NULL,
+    email           VARCHAR(255) NOT NULL UNIQUE,
     password_hash   VARCHAR(255) NOT NULL,
     role            VARCHAR(50) NOT NULL DEFAULT 'user'
-                    CHECK (role IN ('admin', 'user', 'operator')),
+                    CHECK (role IN ('admin', 'user', 'guest')),
     is_active       BOOLEAN     NOT NULL DEFAULT TRUE,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
-    -- Email único por tenant (não globalmente)
-    CONSTRAINT uq_user_email_per_tenant UNIQUE (tenant_id, email)
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Índices
-CREATE INDEX idx_users_tenant_id ON users(tenant_id);
 CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_tenant_role ON users(tenant_id, role);
+CREATE INDEX idx_users_role  ON users(role);
+-- Se multi-tenant: adicionar org_id FK + índice composto
 
 -- ============================================================
 -- {PRÓXIMA ENTIDADE}
@@ -136,8 +123,8 @@ CREATE INDEX idx_users_tenant_role ON users(tenant_id, role);
 
 **Regras para o schema:**
 - UUID como PK (não integer auto-increment) — portabilidade e segurança
-- `tenant_id` em TODA tabela que tem isolamento multi-tenant
 - `created_at` e `updated_at` em toda tabela
+- Se multi-tenant: `org_id` FK em toda tabela com isolamento de organização
 - Soft delete via `deleted_at TIMESTAMPTZ` (não DELETE físico) para tabelas com auditoria
 - Constraints explícitas com nome descritivo (`uq_`, `fk_`, `chk_`)
 - Comentários em campos não-óbvios
@@ -152,11 +139,11 @@ db.createCollection("{collection}", {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["_id", "tenant_id", "created_at"],
+      required: ["_id", "user_id", "created_at"],
       properties: {
         _id: { bsonType: "objectId" },
-        tenant_id: { bsonType: "objectId", description: "Required" },
-        // ... demais campos
+        user_id: { bsonType: "objectId", description: "Owner reference" },
+        // ... demais campos do domínio
         created_at: { bsonType: "date" },
         updated_at: { bsonType: "date" }
       }
@@ -164,9 +151,9 @@ db.createCollection("{collection}", {
   }
 })
 
-// Índices
-db.{collection}.createIndex({ tenant_id: 1 })
-db.{collection}.createIndex({ tenant_id: 1, email: 1 }, { unique: true })
+// Índices — adaptar às queries reais do projeto
+db.{collection}.createIndex({ user_id: 1 })
+db.{collection}.createIndex({ email: 1 }, { unique: true })
 ```
 
 ### 4. Index Strategy (`contracts/index-strategy.md`)
@@ -186,9 +173,9 @@ db.{collection}.createIndex({ tenant_id: 1, email: 1 }, { unique: true })
 ### users
 | Índice | Colunas | Tipo | Justificativa |
 |--------|---------|------|---------------|
-| idx_users_tenant_id | tenant_id | B-tree | FK — toda query filtra por tenant |
-| idx_users_email | email | B-tree | Login por email |
-| idx_users_tenant_role | tenant_id, role | B-tree | Listagem por role dentro do tenant |
+| idx_users_email | email | B-tree | Login por email (alta frequência) |
+| idx_users_role | role | B-tree | Listagem filtrada por papel |
+| idx_users_created | created_at | B-tree | Ordenação cronológica |
 
 ### {tabela}
 [...]
@@ -197,7 +184,7 @@ db.{collection}.createIndex({ tenant_id: 1, email: 1 }, { unique: true })
 
 | Query | Índice necessário | Complexidade esperada |
 |-------|-----------------|----------------------|
-| SELECT * FROM orders WHERE tenant_id = ? AND status = 'pending' ORDER BY created_at | idx_orders_tenant_status_created | O(log n) |
+| SELECT * FROM orders WHERE user_id = ? AND status = 'pending' ORDER BY created_at | idx_orders_user_status_created | O(log n) |
 ```
 
 ### 5. Migration Guide (`contracts/migrations.md`)
@@ -254,8 +241,8 @@ ALTER TABLE users ALTER COLUMN phone SET NOT NULL;
 ## Regras do Data Architect
 
 ### Para relational databases
-- Multi-tenant: `tenant_id` em toda tabela — sem exceção
 - Nunca usar integer como PK para entidades expostas na API (use UUID)
+- Multi-tenant: se o projeto isola dados por organização, adicionar `org_id` FK em toda tabela relevante
 - Soft delete preferido para entidades com auditoria/histórico
 - VARCHAR com limite real, não VARCHAR(255) genérico para tudo
 - Timestamps sempre com timezone (`TIMESTAMPTZ`, não `TIMESTAMP`)

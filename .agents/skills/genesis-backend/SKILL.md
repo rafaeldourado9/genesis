@@ -75,10 +75,10 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[UUID] = mapped_column(default=uuid.uuid4, primary_key=True)
-    tenant_id: Mapped[UUID] = mapped_column(ForeignKey("tenants.id"), nullable=False, index=True)
-    email: Mapped[str] = mapped_column(String(255), nullable=False)
+    email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     role: Mapped[str] = mapped_column(String(50), default="user")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    # Se o projeto for multi-tenant, adicione: org_id FK
 ```
 
 `schemas.py`:
@@ -106,16 +106,14 @@ class UserRepository:
     def __init__(self, session: AsyncSession):
         self._session = session
 
-    async def find_by_id(self, user_id: UUID, tenant_id: UUID) -> User | None:
+    async def find_by_id(self, user_id: UUID) -> User | None:
         result = await self._session.execute(
-            select(User).where(User.id == user_id, User.tenant_id == tenant_id)
+            select(User).where(User.id == user_id)
         )
         return result.scalar_one_or_none()
 
-    async def find_all(self, tenant_id: UUID) -> list[User]:
-        result = await self._session.execute(
-            select(User).where(User.tenant_id == tenant_id)
-        )
+    async def find_all(self) -> list[User]:
+        result = await self._session.execute(select(User))
         return list(result.scalars().all())
 ```
 
@@ -125,8 +123,8 @@ class UserService:
     def __init__(self, repo: UserRepository):
         self._repo = repo
 
-    async def create_user(self, data: CreateUserRequest, tenant_id: UUID) -> User:
-        existing = await self._repo.find_by_email(data.email, tenant_id)
+    async def create_user(self, data: CreateUserRequest) -> User:
+        existing = await self._repo.find_by_email(data.email)
         if existing:
             raise HTTPException(status_code=409, detail="Email already in use")
         # hash password, create, return
@@ -142,7 +140,7 @@ async def create_user(
     service: UserService = Depends(get_user_service),
     current_user: User = Depends(require_role("admin")),
 ):
-    return await service.create_user(data, current_user.tenant_id)
+    return await service.create_user(data)
 ```
 
 **Regras FastAPI:**
@@ -150,7 +148,7 @@ async def create_user(
 - Toda lógica de negócio em `service.py`
 - Toda query SQL em `repository.py`
 - `Depends()` para injeção de dependências
-- Tenant isolation: filtro por `tenant_id` em TODA query
+- Se multi-tenant: adicionar filtro de organização em toda query
 
 ---
 
@@ -306,14 +304,13 @@ src/main/java/{package}/
 4. **Checklist por endpoint:**
    ```
    [ ] Model criado com todos os campos do schema
-   [ ] Repository: find_by_id, find_all (com filtro tenant), save, delete
+   [ ] Repository: find_by_id, find_all, save, delete
    [ ] Service: regras de negócio, validações, exceções semânticas
    [ ] Controller: deserializa → chama service → serializa
-   [ ] Autenticação/autorização: role check presente
-   [ ] Tenant isolation: tenant_id em toda query
+   [ ] Autenticação/autorização: role check presente (se aplicável)
    [ ] Validação de input: campos obrigatórios, tipos, limites
    [ ] Error handling: 400/401/403/404/409/422/500 tratados
-   [ ] Teste: pelo menos happy path + tenant isolation
+   [ ] Teste: pelo menos happy path + caso de erro
    ```
 
 5. **Rodar testes antes de commitar:**

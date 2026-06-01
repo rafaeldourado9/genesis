@@ -93,42 +93,40 @@ Para cada endpoint/feature, gere contratos Given-When-Then:
 ## {Módulo: Users}
 
 ### TC-001: Criar usuário com sucesso (happy path)
-**Dado:** Admin autenticado, tenant existente, email não cadastrado
+**Dado:** Admin autenticado, email não cadastrado
 **Quando:** POST /api/v1/users com {email, password, role: "user"}
 **Então:**
 - Status 201
 - Resposta contém {id, email, role, is_active: true}
-- Usuário existe no banco com tenant_id correto
 - Senha armazenada como hash (nunca plaintext)
 
 ### TC-002: Criar usuário com email duplicado
-**Dado:** Admin autenticado, email já cadastrado no tenant
-**Quando:** POST /api/v1/users com email existente
+**Dado:** Admin autenticado, email já existente
+**Quando:** POST /api/v1/users com email duplicado
 **Então:**
 - Status 409
 - Body: {"error": "EMAIL_IN_USE", "message": "..."}
 - Nenhum registro criado no banco
 
-### TC-003: Isolamento de tenant
-**Dado:** Admin do Tenant A e Tenant B, cada um com usuários
-**Quando:** Admin do Tenant A lista GET /api/v1/users
-**Então:**
-- Retorna SOMENTE usuários do Tenant A
-- Nenhum usuário do Tenant B visível
-
-### TC-004: RBAC — operador não pode criar usuário
-**Dado:** Operador autenticado
+### TC-003: Autorização — role sem permissão não pode criar usuário
+**Dado:** Usuário com role "guest" autenticado
 **Quando:** POST /api/v1/users
 **Então:**
 - Status 403
 - Body: {"error": "FORBIDDEN"}
 
-### TC-005: Validação de input
+### TC-004: Validação de input
 **Dado:** Admin autenticado
 **Quando:** POST /api/v1/users com email inválido
 **Então:**
 - Status 422
 - Body contém lista de erros com campo "email"
+
+### TC-005: Isolamento de dados (apenas se multi-tenant)
+**Dado:** Usuário A e Usuário B em organizações diferentes
+**Quando:** Usuário A lista GET /api/v1/resources
+**Então:**
+- Retorna SOMENTE recursos da organização de A
 ```
 
 ### 3. Test Files (código real)
@@ -157,16 +155,14 @@ class TestUserService:
 
     async def test_create_user_success(self, service, mock_repo):
         # Given
-        tenant_id = uuid4()
         data = CreateUserRequest(email="user@test.com", password="secret123")
 
         # When
-        user = await service.create_user(data, tenant_id)
+        user = await service.create_user(data)
 
         # Then
         mock_repo.save.assert_called_once()
         assert user.email == "user@test.com"
-        assert user.tenant_id == tenant_id
 
     async def test_create_user_duplicate_email_raises_409(self, service, mock_repo):
         # Given
@@ -174,13 +170,13 @@ class TestUserService:
 
         # When / Then
         with pytest.raises(HTTPException) as exc:
-            await service.create_user(CreateUserRequest(email="used@test.com", password="x"), uuid4())
+            await service.create_user(CreateUserRequest(email="used@test.com", password="x"))
         assert exc.value.status_code == 409
 
 
 # tests/users/test_user_api.py — Integration tests
 @pytest.mark.asyncio
-async def test_create_user_returns_201(client, admin_token, tenant):
+async def test_create_user_returns_201(client, admin_token):
     response = await client.post(
         "/api/v1/users",
         json={"email": "new@test.com", "password": "pass123"},
@@ -193,17 +189,13 @@ async def test_create_user_returns_201(client, admin_token, tenant):
 
 
 @pytest.mark.asyncio
-async def test_tenant_isolation(client, tenant_a_token, tenant_b, db_session):
-    # Create user in tenant B
-    await create_user_in_tenant(db_session, tenant_b.id)
-
-    # Admin of tenant A should NOT see tenant B's users
-    response = await client.get(
+async def test_guest_cannot_create_user(client, guest_token):
+    response = await client.post(
         "/api/v1/users",
-        headers={"Authorization": f"Bearer {tenant_a_token}"}
+        json={"email": "x@test.com", "password": "pass123"},
+        headers={"Authorization": f"Bearer {guest_token}"}
     )
-    users = response.json()["items"]
-    assert all(u["tenant_id"] != str(tenant_b.id) for u in users)
+    assert response.status_code == 403
 ```
 
 **JavaScript + Jest (NestJS):**
@@ -226,10 +218,10 @@ describe('UsersService', () => {
 
   it('should create user with hashed password', async () => {
     mockRepo.findByEmail.mockResolvedValue(null)
-    const result = await service.create({ email: 'test@test.com', password: 'secret' }, tenantId)
+    const result = await service.create({ email: 'test@test.com', password: 'secret' })
     expect(result.email).toBe('test@test.com')
     expect(mockRepo.save).toHaveBeenCalledWith(
-      expect.objectContaining({ tenant_id: tenantId })
+      expect.objectContaining({ email: 'test@test.com' })
     )
   })
 })

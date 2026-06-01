@@ -264,7 +264,6 @@ Genesis is a set of AI agent skill files. It works with any agent runtime that s
 
 ## Roadmap
 
-- [ ] `genesis-alpr` — domain-specific agent for LPR/ANPR systems
 - [ ] `genesis-mobile` — dedicated React Native + Expo agent
 - [ ] `genesis-ml` — ML pipeline agent (data prep, training, serving)
 - [ ] `genesis-migrate` — database migration planner for brownfield projects

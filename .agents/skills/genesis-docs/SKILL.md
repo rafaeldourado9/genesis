@@ -108,7 +108,7 @@ make migrate  # Rodar migrations
 ```
 feat(users): adicionar endpoint de convite
 fix(auth): corrigir refresh token expirado
-test(cameras): adicionar teste de isolamento
+test(orders): adicionar teste de isolamento por usuário
 docs(adr): documentar decisão de banco de dados
 refactor(service): simplificar validação de tenant
 ```
