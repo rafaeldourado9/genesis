@@ -69,6 +69,7 @@ Digite \`/genesis\` para iniciar ou retomar a construção do projeto.
 | \`/genesis-guard\` | Auditar conformidade antes de merge |
 | \`/genesis-reviewer\` | Code review |
 | \`/genesis-docs\` | Gerar documentação |
+| \`/genesis-inspector\` | Inspecionar segurança, telas, botões, bugs e integração frontend→backend |
 
 ## Regra
 

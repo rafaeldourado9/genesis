@@ -7,6 +7,29 @@ Versionamento: [Semantic Versioning](https://semver.org/lang/pt-BR/)
 
 ---
 
+## [1.2.0] — 2026-06-02
+
+### Adicionado
+
+**Novo agente `genesis-inspector`:**
+- Inspeção de segurança frontend: API keys hardcoded, dados sensíveis em storage/logs e variáveis públicas expostas ao browser
+- Inspeção tela por tela: estados loading/error/empty, auth, role check e redirects de permissão
+- Inspeção botão por botão: handlers vazios, links placeholder, forms sem submit e risco de double-submit
+- Auditoria CSS/layout: z-index, stacking context, overflow cortando elementos, tooltips/dropdowns/modais
+- Comparação frontend ↔ backend: endpoints órfãos, typos de path, divergência de shape e token ausente
+- Catálogo de bugs com IDs nomeados (`SEC-001`, `UI-001`, `CSS-001`, `API-001`, etc.)
+- Geração automática de dois sprints: `sprint-fix-{date}.md` e `sprint-backend-create-{date}.md`
+- Detecção de bugs reincidentes via leitura obrigatória de `progress.md` e sprints anteriores
+
+### Melhorado
+
+- `README.md` atualizado com `genesis-inspector` na tabela de agentes e no fluxo principal
+- Documentada a limitação do `genesis-scout` em codebases grandes
+- Roadmap reorganizado com v1.2 como release atual e v1.3/v2.0 como próximos marcos
+- `CLAUDE.md` adicionado com comandos disponíveis e regra de segurança contra sobrescrita sem confirmação
+
+---
+
 ## [1.1.1] — 2026-06-02
 
 ### Corrigido
@@ -94,14 +117,13 @@ Versionamento: [Semantic Versioning](https://semver.org/lang/pt-BR/)
 
 ## Roadmap
 
-### [1.2.0]
-- [ ] Adapter Elixir + Phoenix
-- [ ] Adapter Bun + Hono
-- [ ] Adapter SvelteKit
-- [ ] Agente `genesis-mobile` dedicado para React Native + Expo
+### [1.3.0]
+- [ ] `genesis-migrate` — planejador de migration para projetos brownfield complexos
+- [ ] Melhorar `genesis-scout` para codebases >50k linhas
+- [ ] `genesis-mobile` — agente dedicado para React Native + Expo
+- [ ] `genesis-ml` — agente de pipeline ML
 
 ### [2.0.0]
-- [ ] Agente `genesis-ml` — pipeline de ML
-- [ ] Agente `genesis-migrate` — planejador de migration para projetos brownfield
+- [ ] Interface web para tracking de sprints e progresso
 - [ ] Registro de agentes da comunidade
-- [ ] Dashboard web para gerenciamento de projetos e sprints
+- [ ] Suporte a Cursor Rules (`.cursorrules`)

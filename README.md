@@ -7,7 +7,7 @@
 **Construa software production-ready a partir de uma descrição.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-1.1.1-blue.svg)](https://github.com/rafaeldourado9/genesis-skill/releases)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/rafaeldourado9/genesis-skill/releases)
 [![npm](https://img.shields.io/npm/v/genesis-framework.svg)](https://www.npmjs.com/package/genesis-framework)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -136,6 +136,7 @@ genesis-frontend  ──→  componentes UI, estado, rotas (adapta ao seu framew
 genesis-qa        ──→  pirâmide de testes, BDD, cobertura
 genesis-devops    ──→  Docker, pipelines CI/CD, monitoramento
 genesis-guard     ──→  auditoria de conformidade antes do merge
+genesis-inspector ──→  segurança frontend, mapa de telas/botões/bugs, sprint de fix
 genesis-docs      ──→  README, runbooks, catálogo de ADRs
 ```
 
@@ -215,6 +216,7 @@ Sprint 1 concluído. 3 restantes.
 | `genesis-docs` | Documentação | README, runbooks, catálogo ADR |
 | `genesis-guard` | Conformidade | Relatório de auditoria pré-merge |
 | `genesis-reviewer` | Code review | Bugs, anti-patterns, drift |
+| `genesis-inspector` | Segurança UI + integração | Mapa de telas/botões/bugs, sprint de fix |
 
 ---
 
@@ -306,8 +308,23 @@ Tudo que o Genesis gera vai para `.genesis/` — nunca toca seu código existent
 2. **ADR-first** — toda decisão não-trivial tem um registro escrito
 3. **Bottom-up** — dados → backend → frontend (nunca o contrário)
 4. **Pirâmide de testes** — zero merge sem testes adequados
-5. **Memória persistente** — sessões retomam de onde pararam
+5. **Memória persistente** — sessões retomam de onde pararam; o `progress.md` registra timestamps de cada sprint executado
 6. **Agnóstico de tecnologia** — adapta-se à sua stack, não ao contrário
+
+---
+
+## Limitações conhecidas
+
+### genesis-scout em codebases grandes
+
+O `genesis-scout` mapeia projetos brownfield antes da geração de código. Em repos grandes (>50 mil linhas) há algumas limitações práticas:
+
+- **Janela de contexto:** o scout lê amostras representativas, não o código completo — pode perder padrões que aparecem apenas em arquivos pouco amostrados.
+- **Módulos não convencionais:** estruturas que desviam muito do padrão (ex: monorepos complexos, workspaces Yarn com múltiplos apps) podem exigir hints manuais.
+- **Gerado vs. escrito à mão:** código gerado por ORMs ou codegen pode inflar as métricas do mapa. O scout tenta detectar e sinalizar esses arquivos.
+- **Recomendação:** em repos grandes, forneça ao scout o caminho dos módulos principais (`src/`, `app/`, `packages/core/`) em vez de apontar para a raiz.
+
+Essas limitações são conhecidas e fazem parte do roadmap de melhoria.
 
 ---
 
@@ -324,12 +341,24 @@ O Genesis é um conjunto de arquivos de skill para agentes de IA. Funciona com q
 
 ## Roadmap
 
+### v1.2 — Qualidade e diagnóstico (atual)
+
+- [x] `genesis-inspector` — segurança frontend, mapa de telas/botões/bugs, sprint de fix
+
+### v1.3 — Brownfield e domínios específicos (próximo)
+
+- [ ] `genesis-migrate` — planejador de migration para projetos brownfield complexos
+- [ ] Melhorar `genesis-scout` para codebases >50k linhas (amostragem dirigida)
 - [ ] `genesis-mobile` — agente dedicado para React Native + Expo
 - [ ] `genesis-ml` — agente de pipeline ML (prep de dados, treino, serving)
-- [ ] `genesis-migrate` — planejador de migration para projetos brownfield
-- [ ] Interface web para gerenciamento de projetos e tracking de sprints
-- [ ] Registro de agentes da comunidade
+
+### v2.0 — Plataforma (longo prazo)
+
+- [ ] Interface web para tracking de sprints e progresso
+- [ ] Registro de agentes da comunidade (terceiros)
 - [ ] Suporte a Cursor Rules (`.cursorrules`)
+
+> Quer influenciar a ordem? Abra uma issue com o label `roadmap`.
 
 ---
 
