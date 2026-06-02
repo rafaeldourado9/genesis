@@ -1,17 +1,17 @@
-# Contributing to Genesis
+# Contribuindo com o Genesis
 
-Thank you for your interest in contributing! Genesis gets better with every new agent, language adapter, and real-world use case.
+Obrigado pelo interesse em contribuir! O Genesis melhora a cada novo agente, adapter de linguagem e caso de uso real.
 
-## Ways to Contribute
+## Formas de Contribuir
 
-### 1. Add a language/framework adapter
+### 1. Adicionar um adapter de linguagem/framework
 
-`genesis-backend` and `genesis-frontend` have adapters for the most common stacks. If yours is missing, add a section to the relevant SKILL.md.
+`genesis-backend` e `genesis-frontend` têm adapters para as stacks mais comuns. Se a sua não estiver lá, adicione uma seção no SKILL.md correspondente.
 
 ```markdown
 ### Ruby + Rails
 
-**Structure:**
+**Estrutura:**
 ```
 app/
 ├── controllers/
@@ -25,75 +25,75 @@ app/
 ```
 ```
 
-### 2. Create a domain-specific agent
+### 2. Criar um agente específico de domínio
 
-Genesis agents are just SKILL.md files. If you have expertise in a specific domain (e-commerce, healthcare, IoT, ML), create a specialized agent:
+Agentes do Genesis são apenas arquivos SKILL.md. Se você tem experiência em um domínio específico (e-commerce, saúde, IoT, ML), crie um agente especializado:
 
 ```
 .agents/skills/
 └── genesis-ecommerce/
-    └── SKILL.md    ← your domain-specific guidance
+    └── SKILL.md    ← sua orientação específica do domínio
 ```
 
-### 3. Share a real project built with Genesis
+### 3. Compartilhar um projeto real feito com Genesis
 
-Add it to [`examples/`](examples/) with a brief README showing what Genesis generated vs what you customized.
+Adicione em [`examples/`](examples/) com um README breve mostrando o que o Genesis gerou vs o que você customizou.
 
-### 4. Improve existing agents
+### 4. Melhorar agentes existentes
 
-Found a pattern that works better? Improve an existing SKILL.md with a PR explaining why.
+Encontrou um padrão que funciona melhor? Melhore um SKILL.md existente com um PR explicando o porquê.
 
-### 5. Report issues
+### 5. Reportar problemas
 
-Found a case where Genesis gave bad advice? Open an issue with:
-- The project type (backend, fullstack, mobile)
-- The tech stack
-- What Genesis produced
-- What it should have produced instead
+Encontrou um caso onde o Genesis deu uma orientação ruim? Abra uma issue com:
+- O tipo de projeto (backend, fullstack, mobile)
+- A stack utilizada
+- O que o Genesis produziu
+- O que deveria ter produzido
 
 ---
 
-## Development Setup
+## Configuração do Ambiente
 
 ```bash
 git clone https://github.com/rafaeldourado9/genesis-skill.git
 cd genesis-skill
 
-# No dependencies — Genesis is just SKILL.md files
-# Test by installing in a sample project:
-bash install.sh /tmp/test-project
+# Sem dependências — Genesis é apenas arquivos SKILL.md
+# Teste instalando em um projeto de exemplo:
+bash install.sh /tmp/projeto-teste
 ```
 
-## Pull Request Process
+## Processo de Pull Request
 
-1. Fork the repo
-2. Create a branch: `git checkout -b feat/ruby-rails-adapter`
-3. Make your changes
-4. Ensure SKILL.md files follow the existing format (frontmatter + structured sections)
-5. Open a PR with:
-   - What you added/changed
-   - Example of what Genesis now produces with your change
-   - Any trade-offs or limitations
+1. Faça um fork do repositório
+2. Crie uma branch: `git checkout -b feat/adapter-ruby-rails`
+3. Faça suas alterações
+4. Garanta que os arquivos SKILL.md seguem o formato existente (frontmatter + seções estruturadas)
+5. Abra um PR com:
+   - O que você adicionou/alterou
+   - Exemplo do que o Genesis passa a produzir com sua mudança
+   - Trade-offs ou limitações
 
-## SKILL.md Format
+## Formato do SKILL.md
 
-All agents must have frontmatter:
+Todos os agentes devem ter frontmatter:
 
 ```yaml
 ---
-name: genesis-{name}
+name: genesis-{nome}
 description: >
-  One paragraph description. Used by AI to decide when to invoke this agent.
+  Descrição de um parágrafo. Usada pelo agente de IA para decidir quando invocar este agente.
 metadata:
-  author: {your-github-handle}
+  author: {seu-usuario-github}
   version: "1.0.0"
-  role: {role}
+  role: {papel}
   framework: genesis
 ---
 ```
 
-## Code of Conduct
+## Código de Conduta
 
-Be kind. We're all here to build better software faster.
+Seja gentil. Estamos todos aqui para construir software melhor, mais rápido.
 
-Questions? Open a [Discussion](https://github.com/rafaeldourado9/genesis-skill/discussions).
+Dúvidas? Abra uma [Discussion](https://github.com/rafaeldourado9/genesis-skill/discussions).

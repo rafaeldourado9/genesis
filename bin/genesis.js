@@ -191,7 +191,7 @@ function cmdGlobal(force) {
   console.log('  Abra qualquer projeto → Digite /genesis');
   console.log('');
   log('yellow', 'Nota: para estado persistente por projeto, rode também:');
-  console.log('  npx genesis-framework init [diretório]');
+  console.log('  npx github:rafaeldourado9/genesis-skill init [diretório]');
   console.log('');
 }
 
@@ -209,7 +209,7 @@ function cmdHelp() {
   console.log('Framework multi-agente para construir software a partir de uma descrição.');
   console.log('');
   log('cyan', 'Uso:');
-  console.log('  npx genesis-framework <comando> [opções]');
+  console.log('  npx github:rafaeldourado9/genesis-skill <comando> [opções]');
   console.log('');
   log('cyan', 'Comandos:');
   console.log('  init [dir]    Instala no projeto (padrão: diretório atual)');
@@ -222,11 +222,11 @@ function cmdHelp() {
   console.log('  --global, -g  Instala globalmente (alias para "global")');
   console.log('');
   log('cyan', 'Exemplos:');
-  console.log('  npx genesis-framework init');
-  console.log('  npx genesis-framework init /caminho/do/projeto');
-  console.log('  npx genesis-framework global');
-  console.log('  npx genesis-framework init --force');
-  console.log('  npx genesis-framework update --global');
+  console.log('  npx github:rafaeldourado9/genesis-skill init');
+  console.log('  npx github:rafaeldourado9/genesis-skill init /caminho/do/projeto');
+  console.log('  npx github:rafaeldourado9/genesis-skill global');
+  console.log('  npx github:rafaeldourado9/genesis-skill init --force');
+  console.log('  npx github:rafaeldourado9/genesis-skill update --global');
   console.log('');
   log('cyan', 'Após instalar:');
   console.log('  Abra Claude Code e digite /genesis');

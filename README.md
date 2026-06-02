@@ -35,23 +35,23 @@ Começar um projeto do jeito certo leva dias:
 
 Escolha o método mais conveniente para você.
 
-### Método 1 — npx (recomendado, sem instalação prévia)
+### Método 1 — npx via GitHub (recomendado, sem instalação prévia)
 
 ```bash
 # Instalar no projeto atual
-npx genesis-framework init
+npx github:rafaeldourado9/genesis-skill init
 
 # Instalar em um diretório específico
-npx genesis-framework init /caminho/do/projeto
+npx github:rafaeldourado9/genesis-skill init /caminho/do/projeto
 
 # Instalar globalmente no Claude Code (qualquer projeto)
-npx genesis-framework global
+npx github:rafaeldourado9/genesis-skill global
 ```
 
 ### Método 2 — npm global
 
 ```bash
-npm install -g genesis-framework
+npm install -g github:rafaeldourado9/genesis-skill
 
 # Depois use em qualquer lugar:
 genesis-framework init
