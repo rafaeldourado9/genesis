@@ -231,7 +231,7 @@ function cmdHelp() {
   log('cyan', 'Após instalar:');
   console.log('  Abra Claude Code e digite /genesis');
   console.log('');
-  console.log('  Documentação: https://github.com/rafaeldourado9/genesis');
+  console.log('  Documentação: https://github.com/rafaeldourado9/genesis-skill');
   console.log('');
 }
 

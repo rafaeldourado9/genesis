@@ -1,10 +1,10 @@
 # Genesis Framework — Instalador Remoto (Windows PowerShell)
-# Uso: iwr -useb https://raw.githubusercontent.com/rafaeldourado9/genesis/main/scripts/install-remote.ps1 | iex
+# Uso: iwr -useb https://raw.githubusercontent.com/rafaeldourado9/genesis-skill/main/scripts/install-remote.ps1 | iex
 # Ou:  iwr -useb ... | iex; Invoke-Genesis "C:\seu\projeto"
 
 param([string]$Target = ".")
 
-$Repo   = "rafaeldourado9/genesis"
+$Repo   = "rafaeldourado9/genesis-skill"
 $Branch = "main"
 
 Write-Host ""

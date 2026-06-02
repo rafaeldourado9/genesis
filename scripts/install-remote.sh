@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Genesis Framework — Instalador Remoto (Linux/macOS)
-# Uso: curl -fsSL https://raw.githubusercontent.com/rafaeldourado9/genesis/main/scripts/install-remote.sh | bash
+# Uso: curl -fsSL https://raw.githubusercontent.com/rafaeldourado9/genesis-skill/main/scripts/install-remote.sh | bash
 # Ou:  curl -fsSL ... | bash -s -- /caminho/do/projeto
 
 set -euo pipefail
 
-REPO="rafaeldourado9/genesis"
+REPO="rafaeldourado9/genesis-skill"
 BRANCH="main"
 TARGET="${1:-.}"
 

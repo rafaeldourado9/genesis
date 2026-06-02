@@ -56,8 +56,8 @@ Found a case where Genesis gave bad advice? Open an issue with:
 ## Development Setup
 
 ```bash
-git clone https://github.com/rafaeldourado9/genesis.git
-cd genesis
+git clone https://github.com/rafaeldourado9/genesis-skill.git
+cd genesis-skill
 
 # No dependencies — Genesis is just SKILL.md files
 # Test by installing in a sample project:
@@ -96,4 +96,4 @@ metadata:
 
 Be kind. We're all here to build better software faster.
 
-Questions? Open a [Discussion](https://github.com/rafaeldourado9/genesis/discussions).
+Questions? Open a [Discussion](https://github.com/rafaeldourado9/genesis-skill/discussions).

@@ -27,10 +27,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rafaeldourado9/genesis.git"
+    "url": "git+https://github.com/rafaeldourado9/genesis-skill.git"
   },
-  "homepage": "https://github.com/rafaeldourado9/genesis#readme",
+  "homepage": "https://github.com/rafaeldourado9/genesis-skill#readme",
   "bugs": {
-    "url": "https://github.com/rafaeldourado9/genesis/issues"
+    "url": "https://github.com/rafaeldourado9/genesis-skill/issues"
   }
 }

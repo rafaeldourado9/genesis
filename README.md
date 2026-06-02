@@ -7,7 +7,7 @@
 **Construa software production-ready a partir de uma descrição.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/rafaeldourado9/genesis/releases)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/rafaeldourado9/genesis-skill/releases)
 [![npm](https://img.shields.io/npm/v/genesis-framework.svg)](https://www.npmjs.com/package/genesis-framework)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -61,30 +61,30 @@ genesis-framework global
 ### Método 3 — One-liner (Linux/macOS)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rafaeldourado9/genesis/main/scripts/install-remote.sh | bash
+curl -fsSL https://raw.githubusercontent.com/rafaeldourado9/genesis-skill/main/scripts/install-remote.sh | bash
 ```
 
 Com diretório específico:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rafaeldourado9/genesis/main/scripts/install-remote.sh | bash -s -- /caminho/do/projeto
+curl -fsSL https://raw.githubusercontent.com/rafaeldourado9/genesis-skill/main/scripts/install-remote.sh | bash -s -- /caminho/do/projeto
 ```
 
 ### Método 4 — One-liner (Windows PowerShell)
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/rafaeldourado9/genesis/main/scripts/install-remote.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/rafaeldourado9/genesis-skill/main/scripts/install-remote.ps1 | iex
 ```
 
 ### Método 5 — Manual (clone + script)
 
 ```bash
 # Linux/macOS
-git clone https://github.com/rafaeldourado9/genesis.git ~/tools/genesis
+git clone https://github.com/rafaeldourado9/genesis-skill.git ~/tools/genesis
 bash ~/tools/genesis/install.sh /caminho/do/projeto
 
 # Windows
-git clone https://github.com/rafaeldourado9/genesis.git D:\tools\genesis
+git clone https://github.com/rafaeldourado9/genesis-skill.git D:\tools\genesis
 D:\tools\genesis\install.ps1 -ProjectPath "C:\seu\projeto"
 ```
 
@@ -353,6 +353,6 @@ MIT — use, modifique, distribua, construa em cima.
 
 <div align="center">
 
-**Construído com Genesis · [Dê uma estrela](https://github.com/rafaeldourado9/genesis) se ajudou**
+**Construído com Genesis · [Dê uma estrela](https://github.com/rafaeldourado9/genesis-skill) se ajudou**
 
 </div>
