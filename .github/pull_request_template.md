@@ -1,28 +1,28 @@
-## What does this PR do?
+## O que este PR faz?
 
-<!-- Clear description of the change -->
+<!-- Descrição clara da mudança -->
 
-## Type of change
+## Tipo de mudança
 
-- [ ] New language/framework adapter (in `genesis-backend` or `genesis-frontend`)
-- [ ] New domain-specific agent
-- [ ] Improvement to existing agent
-- [ ] Bug fix (agent produced incorrect output)
-- [ ] Documentation
-- [ ] Install scripts / tooling
+- [ ] Novo adapter de linguagem/framework (em `genesis-backend` ou `genesis-frontend`)
+- [ ] Novo agente específico de domínio
+- [ ] Melhoria em agente existente
+- [ ] Correção de bug (agente produzia saída incorreta)
+- [ ] Documentação
+- [ ] Scripts de instalação / tooling
 
-## Which agents are affected?
+## Quais agentes foram afetados?
 
-<!-- List the SKILL.md files modified -->
+<!-- Liste os arquivos SKILL.md modificados -->
 
-## Example of what Genesis now produces
+## Exemplo do que o Genesis passa a produzir
 
-<!-- Before/after comparison or example output -->
+<!-- Comparação antes/depois ou exemplo de saída -->
 
 ## Checklist
 
-- [ ] SKILL.md frontmatter is complete and accurate
-- [ ] Description in frontmatter clearly explains when to use this agent
-- [ ] New patterns follow existing conventions in the file
-- [ ] I've tested this with a real project (or a representative prompt)
-- [ ] README updated if new agent added
+- [ ] Frontmatter do SKILL.md está completo e correto
+- [ ] A descrição no frontmatter explica claramente quando usar este agente
+- [ ] Novos padrões seguem as convenções existentes no arquivo
+- [ ] Testei com um projeto real (ou um prompt representativo)
+- [ ] README atualizado se um novo agente foi adicionado

@@ -1,40 +1,40 @@
 ---
-name: Bug report
-about: Genesis produced incorrect or unhelpful output
+name: Relato de bug
+about: O Genesis produziu uma saída incorreta ou inútil
 title: '[BUG] '
 labels: bug
 assignees: ''
 ---
 
-## What happened?
+## O que aconteceu?
 
-<!-- Describe what Genesis produced that was wrong or unhelpful -->
+<!-- Descreva o que o Genesis produziu de errado ou inútil -->
 
-## What should have happened?
+## O que deveria ter acontecido?
 
-<!-- What output did you expect? -->
+<!-- Qual saída você esperava? -->
 
-## Project context
+## Contexto do projeto
 
-- **Project type:** (e.g., REST API, fullstack web, mobile)
-- **Tech stack:** (e.g., Python + FastAPI + PostgreSQL)
-- **Genesis phase:** (e.g., architecture, sprint, qa)
-- **Agent involved:** (e.g., genesis-architect, genesis-backend)
+- **Tipo de projeto:** (ex: REST API, fullstack web, mobile)
+- **Stack utilizada:** (ex: Python + FastAPI + PostgreSQL)
+- **Fase do Genesis:** (ex: arquitetura, sprint, qa)
+- **Agente envolvido:** (ex: genesis-architect, genesis-backend)
 
-## Reproduce
+## Como reproduzir
 
 ```
-/genesis (or /genesis-{agent})
+/genesis (ou /genesis-{agente})
 ```
 
-1. I described my project as: "..."
-2. Genesis responded with: "..."
-3. The problem was: "..."
+1. Descrevi meu projeto como: "..."
+2. O Genesis respondeu com: "..."
+3. O problema foi: "..."
 
-## Expected output
+## Saída esperada
 
-What should Genesis have said/generated instead?
+O que o Genesis deveria ter dito/gerado?
 
-## Additional context
+## Contexto adicional
 
-<!-- Any other context about the problem -->
+<!-- Qualquer outro contexto sobre o problema -->

@@ -1,40 +1,40 @@
 ---
-name: New language/framework adapter
-about: Add support for a new backend language, frontend framework, or database
+name: Novo adapter de linguagem/framework
+about: Adicionar suporte a uma nova linguagem backend, framework frontend ou banco de dados
 title: '[ADAPTER] '
 labels: adapter, help wanted
 assignees: ''
 ---
 
-## Adapter details
+## Detalhes do adapter
 
-- **Language/Framework:** (e.g., Elixir + Phoenix, Bun + Hono, SvelteKit)
-- **Agent to modify:** `genesis-backend` / `genesis-frontend` / `genesis-data`
-- **Why this stack?** (popularity, use case, community demand)
+- **Linguagem/Framework:** (ex: Elixir + Phoenix, Bun + Hono, SvelteKit)
+- **Agente a modificar:** `genesis-backend` / `genesis-frontend` / `genesis-data`
+- **Por que esta stack?** (popularidade, caso de uso, demanda da comunidade)
 
-## Proposed SKILL.md section
+## Seção SKILL.md proposta
 
 ```markdown
-### {Language} + {Framework}
+### {Linguagem} + {Framework}
 
-**Structure:**
+**Estrutura:**
 \```
 src/
 ├── ...
 \```
 
-**Pattern:**
-\`\`\`{language}
-// example code
+**Padrão:**
+\`\`\`{linguagem}
+// código de exemplo
 \`\`\`
 
-**Rules:**
-- {rule 1}
-- {rule 2}
+**Regras:**
+- {regra 1}
+- {regra 2}
 ```
 
-## Are you willing to contribute this?
+## Você está disposto a contribuir com isso?
 
-- [ ] Yes, I'll open a PR
-- [ ] I can help test it
-- [ ] Requesting for someone else to implement
+- [ ] Sim, vou abrir um PR
+- [ ] Posso ajudar a testar
+- [ ] Estou solicitando que outra pessoa implemente

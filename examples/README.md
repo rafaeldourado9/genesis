@@ -1,38 +1,38 @@
-# Genesis Examples
+# Exemplos do Genesis
 
-Real projects built with Genesis. Each example shows the prompt used and what Genesis generated.
+Projetos reais construídos com o Genesis. Cada exemplo mostra o prompt utilizado e o que o Genesis gerou.
 
-## Contribute an example
+## Contribua com um exemplo
 
-Built something with Genesis? Add it here! See [CONTRIBUTING.md](../CONTRIBUTING.md).
+Construiu algo com o Genesis? Adicione aqui! Veja [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ---
 
-## [Coming soon] TaskFlow — Kanban board
+## [Em breve] TaskFlow — Quadro Kanban
 
 Stack: Python + FastAPI + PostgreSQL + React + Vite
 
-Genesis generated:
-- Architecture in 5 minutes
-- 28-task backlog
-- Sprint 1 (auth + core domain) in ~45 minutes of LLM time
+O Genesis gerou:
+- Arquitetura em 5 minutos
+- Backlog com 28 tarefas
+- Sprint 1 (auth + domínio principal) em ~45 minutos de tempo de LLM
 
 ---
 
-## [Coming soon] QuickStore — E-commerce API
+## [Em breve] QuickStore — API de E-commerce
 
 Stack: Node.js + NestJS + PostgreSQL + Redis
 
 ---
 
-## Submit your example
+## Envie seu exemplo
 
-Open a PR adding your project to this directory:
+Abra um PR adicionando seu projeto neste diretório:
 
 ```
 examples/
-└── your-project-name/
-    ├── README.md          # what you built, what Genesis generated
-    ├── manifest.md        # your .genesis/manifest.md
-    └── architecture/      # your .genesis/architecture/ (optional)
+└── nome-do-seu-projeto/
+    ├── README.md          # o que você construiu, o que o Genesis gerou
+    ├── manifest.md        # seu .genesis/manifest.md
+    └── architecture/      # seu .genesis/architecture/ (opcional)
 ```

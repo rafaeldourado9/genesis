@@ -1,26 +1,26 @@
 ---
-name: Feature request
-about: Suggest a new agent, adapter, or capability
+name: Sugestão de funcionalidade
+about: Sugira um novo agente, adapter ou capacidade
 title: '[FEAT] '
 labels: enhancement
 assignees: ''
 ---
 
-## What would you like Genesis to do?
+## O que você gostaria que o Genesis fizesse?
 
-<!-- A clear description of what you want Genesis to be able to do -->
+<!-- Uma descrição clara do que você quer que o Genesis seja capaz de fazer -->
 
-## Current limitation
+## Limitação atual
 
-<!-- What can't you do today? -->
+<!-- O que você não consegue fazer hoje? -->
 
-## Proposed solution
+## Solução proposta
 
-<!-- How do you think this should work? -->
+<!-- Como você acha que isso deveria funcionar? -->
 
-## Which agent would this affect?
+## Qual agente seria afetado?
 
-- [ ] `genesis` (orchestrator)
+- [ ] `genesis` (orquestrador)
 - [ ] `genesis-intake`
 - [ ] `genesis-scout`
 - [ ] `genesis-architect`
@@ -33,14 +33,14 @@ assignees: ''
 - [ ] `genesis-docs`
 - [ ] `genesis-guard`
 - [ ] `genesis-reviewer`
-- [ ] New agent (describe below)
+- [ ] Novo agente (descreva abaixo)
 
-## New agent idea
+## Ideia de novo agente
 
-<!-- If you're suggesting a new agent, describe its role, inputs, and outputs -->
+<!-- Se estiver sugerindo um novo agente, descreva seu papel, entradas e saídas -->
 
-## Are you willing to contribute this?
+## Você está disposto a contribuir com isso?
 
-- [ ] Yes, I'd like to implement this
-- [ ] I can help review
-- [ ] I'm just suggesting the idea
+- [ ] Sim, gostaria de implementar
+- [ ] Posso ajudar na revisão
+- [ ] Só estou sugerindo a ideia
