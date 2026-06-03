@@ -7,6 +7,33 @@ Versionamento: [Semantic Versioning](https://semver.org/lang/pt-BR/)
 
 ---
 
+## [1.3.0] — 2026-06-03
+
+### Adicionado
+
+**Novo agente `spec-agent` (`.ai/agents/spec-agent.md`):**
+- Especificação técnica e auditoria completa de módulos DDD antes e depois da implementação
+- Classificação de qualidade de domínio: Rich Domain / Acceptable Application Service / Anemic Domain / CRUD-only Backend
+- Detecção de backend anêmico: entidades sem métodos de negócio, status alterado via PUT genérico, regras vazando para controller ou frontend
+- Status Transition Matrix obrigatória para qualquer entidade com campo `status`
+- Route Map by Use Case para resolver dificuldade de localização de rotas em projetos DDD
+- Business Action Matrix diferenciando CRUD técnico de ações de negócio
+- Frontend Action Map com inventário de telas, botões obrigatórios e estados (loading/empty/error/forbidden)
+- Auth and Permission Audit com checklist de JWT, interceptor e permission codes no formato `CONTEXT_ACTION_RESOURCE`
+- Shared Kernel and Context Relationship Audit com Cross-Context Relationship Matrix e 7 tipos de relação (Owns, References by ID, Snapshot, Read Model, Domain Event, External Contract, Invalid Coupling)
+- 15+ Blocking Rules que impedem aprovação de features com gaps críticos
+- Exemplo completo do módulo Contas a Pagar com entidade, use cases, domain methods, endpoints, telas, botões, permission codes e testes backend/frontend
+- Relatório de 25 seções: `Module Spec and Audit Report`
+
+**Guia de uso (`docs/ddd/spec-agent-usage.md`):**
+- Prompts prontos para cada etapa: antes de codar, durante, após, antes do PR
+- Como gerar Gap Report e Gap Report classificado (CRITICAL / MAJOR / MINOR)
+- Como mandar o code assistant corrigir gaps de domínio, frontend, autenticação e bounded contexts
+- Tabela de referência rápida com comandos por situação
+- Integração documentada com o Genesis Framework (`genesis-guard` + `spec-agent`)
+
+---
+
 ## [1.2.0] — 2026-06-02
 
 ### Adicionado
