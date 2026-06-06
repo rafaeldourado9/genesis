@@ -32,11 +32,63 @@ Se `manifest.md` não existe:
 Execute /genesis-intake primeiro para coletar os requisitos.
 ```
 
+## Passo 2 — Calcular o tier de escala
+
+Antes de qualquer decisão de stack, leia a seção "Plano de Capacidade" do manifest e derive o tier:
+
+| Tier | Usuários simultâneos | Time | Tipo |
+|------|---------------------|------|------|
+| **nano** | < 10 | 1 pessoa | MVP/experimento |
+| **micro** | < 100 | 1-2 pessoas | MVP validado |
+| **small** | < 1.000 | 2-5 pessoas | Produto inicial |
+| **medium** | < 10.000 | 5-15 pessoas | Produto crescendo |
+| **large** | < 100.000 | 15-50 pessoas | Escala real |
+| **enterprise** | > 100.000 | > 50 pessoas | Missão crítica |
+
+**Regra MVP:** se o manifest declara "MVP para validar", o tier máximo é **small**, independente das estimativas de usuários.
+
+Escreva o tier derivado na seção "Tier de escala derivado" do manifest antes de continuar.
+
+---
+
+## Teto de complexidade por tier
+
+**Proibido propor sem justificativa explícita em ADR:**
+
+| Componente | Tier mínimo para usar |
+|------------|----------------------|
+| Redis / cache distribuído | medium |
+| Message broker (RabbitMQ, Kafka) | medium |
+| Microservices (qualquer) | large |
+| Kubernetes / orquestração de containers | large |
+| Event sourcing | enterprise |
+| CQRS | large |
+| Data warehouse / analytics separado | large |
+| CDN própria | medium |
+| Multi-region deploy | enterprise |
+
+**Para tiers nano e micro:** monolith + Postgres + Docker Compose + um provider simples (Railway, Render, Fly.io) é a stack correta por padrão.
+
+**Para tiers small e medium:** monolith modular + Postgres + Docker Compose. Redis apenas se houver sessão distribuída ou cache de leitura com evidência de bottleneck.
+
+### Regra de justificativa obrigatória
+
+Se você quiser propor qualquer componente acima do teto do tier calculado, é **obrigatório**:
+
+1. Criar um ADR específico para essa decisão
+2. Responder no ADR: "Por que a solução mais simples não resolve?"
+3. Demonstrar com dados do manifest (não com hipóteses) que a complexidade é necessária
+
+Se você não consegue responder à pergunta acima com dados do manifest, **não proponha o componente**.
+
+---
+
 ## Regras invioláveis
 
 - Nunca invente stack sem base no manifest.
 - Projetos brownfield: não mude a stack existente sem ADR justificando.
 - Toda decisão não-trivial tem um ADR — sem exceção.
+- Nunca proponha complexidade acima do tier sem ADR de justificativa.
 - Produza todos os arquivos listados abaixo. Nenhum é opcional.
 
 ---

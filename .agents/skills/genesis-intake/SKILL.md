@@ -74,6 +74,27 @@ Com base nas respostas do Bloco 1, adapte as perguntas:
 19. Orçamento de infraestrutura mensal estimado?
 ```
 
+### Bloco 6 — Plano de capacidade (obrigatório para projetos greenfield)
+
+Faça estas perguntas SEMPRE que o projeto for novo. As respostas determinam o teto de complexidade arquitetural.
+
+```
+20. Quantos usuários simultâneos no lançamento? E qual a expectativa realista em 12 meses?
+    (Dica: seja conservador — a maioria dos projetos começa com dezenas, não milhares)
+
+21. Qual o volume de dados esperado no primeiro ano?
+    (ex: "100 pedidos/dia", "50 GB de arquivos", "10.000 registros/mês")
+
+22. Qual a disponibilidade necessária?
+    (ex: "pode ficar fora em madrugada" / "24/7 sem interrupções" / "só em horário comercial")
+
+23. Esse projeto é um MVP para validar a ideia, ou vai direto para produção com carga real?
+    (MVP = aceitar limitações técnicas por velocidade; produção = precisão acima de velocidade)
+
+24. Há pico de carga previsível?
+    (ex: "Black Friday", "envio de notas fiscais no fim do mês", "abertura de inscrições")
+```
+
 ---
 
 ## Como conduzir o intake
@@ -119,13 +140,18 @@ Status: APROVADO
 **Autenticação:** {tipo de auth}
 **Multi-tenant:** {sim/não — explicar o modelo}
 
-## Escala e Requisitos
+## Plano de Capacidade
 
 **Usuários simultâneos (lançamento):** {n}
-**Usuários simultâneos (1 ano):** {n}
-**Volume de dados estimado:** {low/medium/high — com justificativa}
-**Disponibilidade necessária:** {99.9%/etc}
-**SLA de resposta:** {< 200ms para API / etc}
+**Usuários simultâneos (12 meses):** {n}
+**Volume de dados (1 ano):** {ex: "100 pedidos/dia", "50 GB"}
+**Disponibilidade necessária:** {pode cair em madrugada / 24-7 / horário comercial}
+**Pico de carga previsível:** {sim — descrever / não}
+**Tipo de projeto:** {MVP para validar / produção com carga real}
+**Tier de escala derivado:** {nano / micro / small / medium / large / enterprise}
+
+> O tier é calculado pelo genesis-architect com base nos dados acima.
+> Ele define o teto de complexidade arquitetural permitido sem justificativa explícita.
 
 ## Entidades Principais
 
