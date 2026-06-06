@@ -9,6 +9,37 @@ const PKG_ROOT = path.join(__dirname, '..');
 const SKILLS_SRC = path.join(PKG_ROOT, '.agents', 'skills');
 const PACKAGE = JSON.parse(fs.readFileSync(path.join(PKG_ROOT, 'package.json'), 'utf8'));
 
+const STATE_SCHEMA = {
+  required: ['project_name', 'phase', 'mode', 'completed_phases', 'last_updated'],
+  phases: ['intake', 'scout', 'architecture', 'data', 'contracts', 'sprints', 'build', 'qa', 'docs', 'done'],
+  modes: ['greenfield', 'brownfield', 'feature-addition'],
+};
+
+function validateState(obj) {
+  if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
+    return { valid: false, errors: ['state.json deve ser um objeto JSON'] };
+  }
+  if (Object.keys(obj).length === 0) return { valid: true, errors: [] };
+
+  const errors = [];
+  for (const field of STATE_SCHEMA.required) {
+    if (!(field in obj)) errors.push(`campo obrigatorio ausente: '${field}'`);
+  }
+  if (obj.phase && !STATE_SCHEMA.phases.includes(obj.phase)) {
+    errors.push(`phase invalido: '${obj.phase}' — valores validos: ${STATE_SCHEMA.phases.join(', ')}`);
+  }
+  if (obj.mode && !STATE_SCHEMA.modes.includes(obj.mode)) {
+    errors.push(`mode invalido: '${obj.mode}' — valores validos: ${STATE_SCHEMA.modes.join(', ')}`);
+  }
+  if (obj.completed_phases !== undefined && !Array.isArray(obj.completed_phases)) {
+    errors.push("'completed_phases' deve ser um array");
+  }
+  if (obj.last_updated && !/^\d{4}-\d{2}-\d{2}T/.test(obj.last_updated)) {
+    errors.push("'last_updated' deve estar em formato ISO 8601");
+  }
+  return { valid: errors.length === 0, errors };
+}
+
 const argv = process.argv.slice(2);
 const cmd = argv[0] || 'help';
 const force = argv.includes('--force') || argv.includes('-f');
@@ -108,6 +139,68 @@ const CLAUDE_MD = `# Genesis Framework\n\nGenesis esta instalado neste projeto. 
 
 const GITIGNORE_BLOCK = `\n# Genesis Framework runtime\n.genesis/memory/\n.genesis/state.json\n`;
 
+function verifySkillDir(dir) {
+  const issues = [];
+  if (!fs.existsSync(dir)) {
+    issues.push('diretorio nao encontrado');
+    return issues;
+  }
+  for (const skill of skills()) {
+    const skillFile = path.join(dir, skill, 'SKILL.md');
+    if (!fs.existsSync(skillFile)) {
+      issues.push(`${skill}/SKILL.md ausente`);
+      continue;
+    }
+    const content = fs.readFileSync(skillFile, 'utf8');
+    if (!content.match(/^---\r?\n[\s\S]*?\r?\n---/)) {
+      issues.push(`${skill}/SKILL.md: frontmatter invalido`);
+    }
+  }
+  return issues;
+}
+
+function verifyInstall(project) {
+  const runtimes = [
+    { label: 'Claude Code', dir: path.join(project, '.claude', 'skills') },
+    { label: 'Codex', dir: path.join(project, '.agents', 'skills') },
+    { label: 'OpenCode', dir: path.join(project, '.opencode', 'skills') },
+  ];
+  console.log('\nVerificando instalacao:');
+  let allOk = true;
+  for (const runtime of runtimes) {
+    const issues = verifySkillDir(runtime.dir);
+    if (issues.length === 0) {
+      console.log(`  [OK]   ${runtime.label}`);
+    } else {
+      allOk = false;
+      console.log(`  [FAIL] ${runtime.label}`);
+      for (const issue of issues) console.log(`         ${issue}`);
+    }
+  }
+  if (!allOk) throw new Error('Verificacao falhou — tente novamente com --force');
+}
+
+function verifyGlobal(home) {
+  const runtimes = [
+    { label: 'Claude Code', dir: path.join(home, '.claude', 'skills') },
+    { label: 'Codex', dir: path.join(home, '.agents', 'skills') },
+    { label: 'OpenCode', dir: path.join(home, '.config', 'opencode', 'skills') },
+  ];
+  console.log('\nVerificando instalacao global:');
+  let allOk = true;
+  for (const runtime of runtimes) {
+    const issues = verifySkillDir(runtime.dir);
+    if (issues.length === 0) {
+      console.log(`  [OK]   ${runtime.label}`);
+    } else {
+      allOk = false;
+      console.log(`  [FAIL] ${runtime.label}`);
+      for (const issue of issues) console.log(`         ${issue}`);
+    }
+  }
+  if (!allOk) throw new Error('Verificacao global falhou — tente novamente com --force');
+}
+
 function installProject(target, overwrite) {
   const project = path.resolve(target);
   if (!fs.existsSync(project) || !fs.statSync(project).isDirectory()) {
@@ -136,6 +229,7 @@ function installProject(target, overwrite) {
     if (!current.includes('.genesis/memory/')) fs.appendFileSync(gitignore, GITIGNORE_BLOCK);
   }
 
+  verifyInstall(project);
   console.log('\nInstalacao concluida.');
   console.log('  Claude Code: /genesis');
   console.log('  OpenCode:    /genesis');
@@ -154,6 +248,7 @@ function installGlobal(overwrite, home = os.homedir()) {
   // who prefer it. Native Codex skill invocation remains $genesis or /skills.
   installCommands(path.join(home, '.codex', 'prompts'), 'codex', overwrite);
 
+  verifyGlobal(home);
   console.log('\nInstalacao global concluida. Reinicie sessoes abertas dos agentes.');
   console.log('  Claude Code: /genesis');
   console.log('  OpenCode:    /genesis');
@@ -166,6 +261,8 @@ function help() {
   console.log('  genesis init [diretorio] [--force]');
   console.log('  genesis global [--force]');
   console.log('  genesis update [diretorio] [--global]');
+  console.log('  genesis verify [diretorio]');
+  console.log('  genesis validate-state [diretorio]');
   console.log('');
   console.log('O instalador ativa automaticamente Claude Code, Codex e OpenCode.');
 }
@@ -189,6 +286,39 @@ function main() {
         if (globalFlag) installGlobal(true);
         else installProject(targetArgument() || '.', true);
         break;
+      case 'verify':
+      case 'check': {
+        const project = path.resolve(targetArgument() || '.');
+        verifyInstall(project);
+        console.log('\nTudo OK.');
+        break;
+      }
+      case 'validate-state': {
+        const project = path.resolve(targetArgument() || '.');
+        const stateFile = path.join(project, '.genesis', 'state.json');
+        if (!fs.existsSync(stateFile)) {
+          console.error(`state.json nao encontrado em ${stateFile}`);
+          process.exitCode = 1;
+          break;
+        }
+        let parsed;
+        try {
+          parsed = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+        } catch (e) {
+          console.error(`state.json invalido: ${e.message}`);
+          process.exitCode = 1;
+          break;
+        }
+        const result = validateState(parsed);
+        if (result.valid) {
+          console.log('state.json valido.');
+        } else {
+          console.error('state.json invalido:');
+          for (const err of result.errors) console.error(`  - ${err}`);
+          process.exitCode = 1;
+        }
+        break;
+      }
       case 'help':
       case '--help':
       case '-h':
@@ -206,4 +336,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { installGlobal, installProject };
+module.exports = { installGlobal, installProject, validateState, verifySkillDir };
