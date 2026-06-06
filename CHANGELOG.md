@@ -7,6 +7,66 @@ Versionamento: [Semantic Versioning](https://semver.org/lang/pt-BR/)
 
 ---
 
+## [1.5.0] — 2026-06-06
+
+### Adicionado
+
+**`genesis-run` — CLI de orquestração multi-LLM:**
+- REPL interativo com prompt `›` e comandos prefixados com `/`
+- Entrada mascarada (`∗` por caracter) via `setRawMode` para senhas e API keys
+- Spinner animado durante chamadas à API
+- Modo one-shot preservado para uso em scripts (`genesis-run run "tarefa"`)
+- Suporte a strings entre aspas no REPL
+
+**Vault seguro (AES-256-GCM + PBKDF2):**
+- Chaves de API cifradas em `~/.genesis/vault.json` com permissão `0600`
+- PBKDF2 com 120.000 iterações + salt aleatório de 256 bits
+- Suporte a até 5 providers com chaves customizadas (`NOME=valor`)
+- Variáveis de ambiente têm prioridade sobre o vault (CI/CD friendly)
+- `$GENESIS_VAULT_PASSPHRASE` para uso sem prompt interativo
+
+**Roteamento automático de agentes:**
+- Detecção de domínio por regex (backend, frontend, qa, architect, docs)
+- Scoring de complexidade por keywords + contagem de palavras
+- Tiers: `junior → haiku` · `pleno → sonnet` · `senior → opus`
+- System prompts especializados por tier
+
+**Multi-LLM em paralelo (`/parallel`):**
+- Roda a mesma tarefa em Claude, OpenAI e Gemini simultaneamente
+- Suporte nativo a Anthropic, OpenAI e Google Gemini via `fetch` sem dependências externas
+
+**Otimização de tokens:**
+- Cache SHA-256 com TTL configurável (padrão 1h)
+- Request coalescing: batch de requests em janela de 80ms
+- Prompt caching para Claude (`cache_control: ephemeral`)
+- Rastreamento por provider/modelo com alertas em 80%, 90% e 95% do budget
+
+**Progress tracking automático:**
+- `progress.md` atualizado ao final de cada task com tokens usados
+- `/status` exibe tokens, cache e tasks pendentes
+
+**Qualidade dos SKILL.md:**
+- Todos os 13 agentes reescritos no estilo prescritivo (tarefa → passos → pré-condições → verificação)
+- Compatível com qualquer LLM, não apenas os mais capazes
+- Plano de capacidade obrigatório no `genesis-intake` (Bloco 6)
+- Teto de complexidade por tier no `genesis-architect` (anti-overengineering)
+- Guard clause no `genesis-sprint`: verifica pré-condições antes de qualquer ação
+
+**Qualidade do instalador:**
+- Verificação pós-instalação automática (`verifyInstall`)
+- Schema de validação para `state.json` (`validateState`)
+- Comando `genesis verify` e `genesis validate-state`
+- 13 testes cobrindo install, frontmatter, verify e schema
+
+### Alterado
+
+- `package.json`: Node.js mínimo elevado para 18 (fetch nativo)
+- `package.json`: `lib/` adicionado ao campo `files`
+- README: nova seção completa de `genesis-run` com exemplos, tabelas e referência rápida
+- Roadmap atualizado: v1.4 concluído, v1.5 atual, v1.6 com próximos passos
+
+---
+
 ## [1.4.0] — 2026-06-06
 
 - Instala automaticamente skills para Claude Code, Codex e OpenCode.
