@@ -7,6 +7,14 @@ Versionamento: [Semantic Versioning](https://semver.org/lang/pt-BR/)
 
 ---
 
+## [1.4.0] — 2026-06-06
+
+- Instala automaticamente skills para Claude Code, Codex e OpenCode.
+- Registra `/genesis` no Claude Code e OpenCode e os aliases suportados pelo Codex.
+- Adiciona testes de instalação multi-runtime e o executável curto `genesis`.
+- Unifica os instaladores PowerShell, Bash e npm no mesmo CLI.
+- Adiciona automação de GitHub Release para tags `v*`.
+
 ## [1.3.0] — 2026-06-03
 
 ### Adicionado
@@ -144,7 +152,7 @@ Versionamento: [Semantic Versioning](https://semver.org/lang/pt-BR/)
 
 ## Roadmap
 
-### [1.3.0]
+### [1.5.0]
 - [ ] `genesis-migrate` — planejador de migration para projetos brownfield complexos
 - [ ] Melhorar `genesis-scout` para codebases >50k linhas
 - [ ] `genesis-mobile` — agente dedicado para React Native + Expo

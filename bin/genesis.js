@@ -1,279 +1,209 @@
 #!/usr/bin/env node
 'use strict';
 
+const fs = require('fs');
+const os = require('os');
 const path = require('path');
-const fs   = require('fs');
-const os   = require('os');
 
-const PKG_ROOT   = path.join(__dirname, '..');
+const PKG_ROOT = path.join(__dirname, '..');
 const SKILLS_SRC = path.join(PKG_ROOT, '.agents', 'skills');
-const VERSION    = JSON.parse(fs.readFileSync(path.join(PKG_ROOT, 'package.json'), 'utf8')).version;
+const PACKAGE = JSON.parse(fs.readFileSync(path.join(PKG_ROOT, 'package.json'), 'utf8'));
 
-// ── Args ────────────────────────────────────────────────────────────────────
-const argv     = process.argv.slice(2);
-const cmd      = argv[0] || 'help';
-const isGlobal = argv.includes('--global') || argv.includes('-g');
-const isForce  = argv.includes('--force')  || argv.includes('-f');
-const targetArg = (() => {
-  const idx = argv.findIndex(a => a === '--path' || a === '-p');
-  if (idx !== -1) return argv[idx + 1];
-  const pos = argv.slice(1).find(a => !a.startsWith('-'));
-  return pos || null;
-})();
+const argv = process.argv.slice(2);
+const cmd = argv[0] || 'help';
+const force = argv.includes('--force') || argv.includes('-f');
+const globalFlag = argv.includes('--global') || argv.includes('-g');
 
-// ── Colors ───────────────────────────────────────────────────────────────────
-const NO_COLOR = process.env.NO_COLOR || !process.stdout.isTTY;
-const g = {
-  reset:  NO_COLOR ? '' : '\x1b[0m',
-  bold:   NO_COLOR ? '' : '\x1b[1m',
-  green:  NO_COLOR ? '' : '\x1b[32m',
-  yellow: NO_COLOR ? '' : '\x1b[33m',
-  cyan:   NO_COLOR ? '' : '\x1b[36m',
-  gray:   NO_COLOR ? '' : '\x1b[90m',
-  red:    NO_COLOR ? '' : '\x1b[31m',
-};
-const c   = (color, text) => `${g[color]}${text}${g.reset}`;
-const log = (color, text) => console.log(c(color, text));
+function targetArgument() {
+  const optionIndex = argv.findIndex((arg) => arg === '--path' || arg === '-p');
+  if (optionIndex !== -1) return argv[optionIndex + 1];
+  return argv.slice(1).find((arg) => !arg.startsWith('-')) || null;
+}
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-function ensureDir(p) { fs.mkdirSync(p, { recursive: true }); }
+function ensureDir(directory) {
+  fs.mkdirSync(directory, { recursive: true });
+}
 
-function listSkills() {
+function copyDirectory(source, destination, overwrite) {
+  ensureDir(destination);
+  for (const entry of fs.readdirSync(source, { withFileTypes: true })) {
+    const sourcePath = path.join(source, entry.name);
+    const destinationPath = path.join(destination, entry.name);
+    if (entry.isDirectory()) {
+      copyDirectory(sourcePath, destinationPath, overwrite);
+    } else if (overwrite || !fs.existsSync(destinationPath)) {
+      fs.copyFileSync(sourcePath, destinationPath);
+    }
+  }
+}
+
+function writeFile(destination, content, overwrite) {
+  if (fs.existsSync(destination) && !overwrite) return false;
+  ensureDir(path.dirname(destination));
+  fs.writeFileSync(destination, content, 'utf8');
+  return true;
+}
+
+function skills() {
   if (!fs.existsSync(SKILLS_SRC)) {
-    log('red', `Erro: skills não encontradas em ${SKILLS_SRC}`);
-    log('red', 'O pacote pode estar corrompido. Reinstale com: npm install -g genesis-framework');
-    process.exit(1);
+    throw new Error(`Skills nao encontradas em ${SKILLS_SRC}`);
   }
-  return fs.readdirSync(SKILLS_SRC).filter(
-    n => n.startsWith('genesis') && fs.statSync(path.join(SKILLS_SRC, n)).isDirectory()
-  );
+  return fs.readdirSync(SKILLS_SRC, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith('genesis'))
+    .map((entry) => entry.name)
+    .sort();
 }
 
-// ── Install content ──────────────────────────────────────────────────────────
-const CLAUDE_MD = `# Genesis Framework
+function descriptionFor(skill) {
+  const content = fs.readFileSync(path.join(SKILLS_SRC, skill, 'SKILL.md'), 'utf8');
+  const frontmatter = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!frontmatter) return `Executar o workflow ${skill}`;
 
-> Framework multi-agente instalado neste projeto.
+  const lines = frontmatter[1].split(/\r?\n/);
+  const index = lines.findIndex((line) => line.startsWith('description:'));
+  if (index === -1) return `Executar o workflow ${skill}`;
 
-## Como usar
+  const value = lines[index].slice('description:'.length).trim();
+  if (value !== '>' && value !== '|') return value.replace(/^['"]|['"]$/g, '');
 
-Digite \`/genesis\` para iniciar ou retomar a construção do projeto.
-
-## Comandos disponíveis
-
-| Comando | Função |
-|---------|--------|
-| \`/genesis\` | Iniciar ou retomar (ponto de entrada principal) |
-| \`/genesis-architect\` | Apenas arquitetura e ADRs |
-| \`/genesis-sprint\` | Executar próximo sprint |
-| \`/genesis-qa\` | Gerar e rodar testes |
-| \`/genesis-guard\` | Auditar conformidade antes de merge |
-| \`/genesis-reviewer\` | Code review |
-| \`/genesis-docs\` | Gerar documentação |
-| \`/genesis-inspector\` | Inspecionar segurança, telas, botões, bugs e integração frontend→backend |
-
-## Regra
-
-Nunca sobrescreva arquivos existentes sem confirmação explícita do usuário.
-O Genesis escreve em \`.genesis/\` e nos diretórios de código gerado.
-`;
-
-const GITIGNORE_BLOCK = `
-# Genesis Framework (runtime — não commitar)
-.genesis/memory/
-.genesis/state.json
-`;
-
-// ── Commands ─────────────────────────────────────────────────────────────────
-
-function cmdInit(targetDir, force) {
-  const absTarget = path.resolve(targetDir);
-
-  if (!fs.existsSync(absTarget)) {
-    log('red', `\nDiretório não encontrado: ${absTarget}`);
-    process.exit(1);
+  const description = [];
+  for (const line of lines.slice(index + 1)) {
+    if (!/^\s+/.test(line)) break;
+    description.push(line.trim());
   }
+  return description.join(' ') || `Executar o workflow ${skill}`;
+}
 
-  log('cyan', '\nGenesis Framework — Instalação no Projeto');
-  log('cyan', '==========================================');
-  console.log(`\nInstalando em: ${c('yellow', absTarget)}\n`);
+function commandContent(skill, runtime) {
+  const invocation = runtime === 'opencode'
+    ? `Use a ferramenta nativa de skills para carregar \`${skill}\``
+    : `Ative explicitamente a skill \`${skill}\``;
+  return `---\ndescription: ${descriptionFor(skill)}\n---\n\n${invocation} e execute integralmente as instrucoes do SKILL.md.\n\nArgumentos adicionais do usuario: $ARGUMENTS\n`;
+}
 
-  // Copy skills → .agents/skills/NOME/SKILL.md
-  const skillsDir = path.join(absTarget, '.agents', 'skills');
-  log('green', 'Copiando skills...');
-
-  for (const skill of listSkills()) {
-    const srcFile  = path.join(SKILLS_SRC, skill, 'SKILL.md');
-    const destDir  = path.join(skillsDir, skill);
-    const destFile = path.join(destDir, 'SKILL.md');
-
-    if (fs.existsSync(destFile) && !force) {
-      log('gray', `  [SKIP] ${skill} — já existe (use --force para sobrescrever)`);
+function installSkills(destinationRoot, overwrite, label) {
+  console.log(`\n${label}`);
+  for (const skill of skills()) {
+    const destination = path.join(destinationRoot, skill);
+    const existed = fs.existsSync(path.join(destination, 'SKILL.md'));
+    if (existed && !overwrite) {
+      console.log(`  [SKIP] ${skill}`);
       continue;
     }
-    ensureDir(destDir);
-    fs.copyFileSync(srcFile, destFile);
-    log('green', `  [OK]   ${skill}`);
+    copyDirectory(path.join(SKILLS_SRC, skill), destination, true);
+    console.log(`  [OK]   ${skill}`);
+  }
+}
+
+function installCommands(destinationRoot, runtime, overwrite) {
+  console.log(`\nComandos ${runtime}:`);
+  for (const skill of skills()) {
+    const destination = path.join(destinationRoot, `${skill}.md`);
+    const changed = writeFile(destination, commandContent(skill, runtime), overwrite);
+    console.log(`  [${changed ? 'OK' : 'SKIP'}] /${skill}`);
+  }
+}
+
+const CLAUDE_MD = `# Genesis Framework\n\nGenesis esta instalado neste projeto. Use \`/genesis\` no Claude Code para iniciar ou retomar o workflow.\n\nNunca apague ou sobrescreva arquivos existentes sem confirmacao explicita.\n`;
+
+const GITIGNORE_BLOCK = `\n# Genesis Framework runtime\n.genesis/memory/\n.genesis/state.json\n`;
+
+function installProject(target, overwrite) {
+  const project = path.resolve(target);
+  if (!fs.existsSync(project) || !fs.statSync(project).isDirectory()) {
+    throw new Error(`Diretorio nao encontrado: ${project}`);
   }
 
-  // Copy templates if present
-  const templatesSrc  = path.join(PKG_ROOT, 'templates');
-  const templatesDest = path.join(absTarget, '.genesis', 'templates');
-  if (fs.existsSync(templatesSrc) && fs.readdirSync(templatesSrc).length > 0) {
-    ensureDir(templatesDest);
-    copyDir(templatesSrc, templatesDest);
-    log('green', '  [OK]   templates');
+  console.log(`\nGenesis Framework ${PACKAGE.version}`);
+  console.log(`Instalando integracoes em ${project}`);
+
+  installSkills(path.join(project, '.agents', 'skills'), overwrite, 'Codex / Agent Skills:');
+  installSkills(path.join(project, '.claude', 'skills'), overwrite, 'Claude Code:');
+  installSkills(path.join(project, '.opencode', 'skills'), overwrite, 'OpenCode:');
+  installCommands(path.join(project, '.opencode', 'commands'), 'opencode', overwrite);
+
+  const templates = path.join(PKG_ROOT, 'templates');
+  if (fs.existsSync(templates)) {
+    copyDirectory(templates, path.join(project, '.genesis', 'templates'), overwrite);
   }
 
-  // CLAUDE.md
-  const claudeMdPath = path.join(absTarget, 'CLAUDE.md');
-  if (!fs.existsSync(claudeMdPath)) {
-    fs.writeFileSync(claudeMdPath, CLAUDE_MD, 'utf8');
-    log('green', '\n  [OK]   CLAUDE.md criado');
-  } else {
-    log('gray', '\n  [SKIP] CLAUDE.md — já existe');
-    log('yellow', '         Dica: adicione "Digite /genesis para usar o Genesis Framework"');
+  writeFile(path.join(project, 'CLAUDE.md'), CLAUDE_MD, false);
+  writeFile(path.join(project, '.genesis', 'state.json'), '{}\n', false);
+
+  const gitignore = path.join(project, '.gitignore');
+  if (fs.existsSync(gitignore)) {
+    const current = fs.readFileSync(gitignore, 'utf8');
+    if (!current.includes('.genesis/memory/')) fs.appendFileSync(gitignore, GITIGNORE_BLOCK);
   }
 
-  // .genesis/state.json
-  const genesisDir = path.join(absTarget, '.genesis');
-  ensureDir(genesisDir);
-  const statePath = path.join(genesisDir, 'state.json');
-  if (!fs.existsSync(statePath)) {
-    fs.writeFileSync(statePath, '{}', 'utf8');
-  }
+  console.log('\nInstalacao concluida.');
+  console.log('  Claude Code: /genesis');
+  console.log('  OpenCode:    /genesis');
+  console.log('  Codex:       $genesis (ou /skills e selecione genesis)');
+}
 
-  // .gitignore
-  const giPath = path.join(absTarget, '.gitignore');
-  if (fs.existsSync(giPath)) {
-    const gi = fs.readFileSync(giPath, 'utf8');
-    if (!gi.includes('.genesis/memory')) {
-      fs.appendFileSync(giPath, GITIGNORE_BLOCK);
-      log('green', '  [OK]   .gitignore atualizado');
+function installGlobal(overwrite, home = os.homedir()) {
+  console.log(`\nGenesis Framework ${PACKAGE.version} - instalacao global`);
+
+  installSkills(path.join(home, '.agents', 'skills'), overwrite, 'Codex / Agent Skills:');
+  installSkills(path.join(home, '.claude', 'skills'), overwrite, 'Claude Code:');
+  installSkills(path.join(home, '.config', 'opencode', 'skills'), overwrite, 'OpenCode:');
+  installCommands(path.join(home, '.config', 'opencode', 'commands'), 'opencode', overwrite);
+
+  // Codex custom prompts are deprecated, but this keeps slash-menu access for users
+  // who prefer it. Native Codex skill invocation remains $genesis or /skills.
+  installCommands(path.join(home, '.codex', 'prompts'), 'codex', overwrite);
+
+  console.log('\nInstalacao global concluida. Reinicie sessoes abertas dos agentes.');
+  console.log('  Claude Code: /genesis');
+  console.log('  OpenCode:    /genesis');
+  console.log('  Codex:       $genesis ou /prompts:genesis');
+}
+
+function help() {
+  console.log(`\nGenesis Framework ${PACKAGE.version}\n`);
+  console.log('Uso:');
+  console.log('  genesis init [diretorio] [--force]');
+  console.log('  genesis global [--force]');
+  console.log('  genesis update [diretorio] [--global]');
+  console.log('');
+  console.log('O instalador ativa automaticamente Claude Code, Codex e OpenCode.');
+}
+
+function main() {
+  try {
+    switch (cmd) {
+      case 'init':
+      case 'install':
+      case 'i':
+        if (globalFlag) installGlobal(force);
+        else installProject(targetArgument() || '.', force);
+        break;
+      case 'global':
+      case 'g':
+        installGlobal(force);
+        break;
+      case 'update':
+      case 'upgrade':
+      case 'u':
+        if (globalFlag) installGlobal(true);
+        else installProject(targetArgument() || '.', true);
+        break;
+      case 'help':
+      case '--help':
+      case '-h':
+        help();
+        break;
+      default:
+        help();
+        process.exitCode = 1;
     }
-  }
-
-  console.log('');
-  log('green', '✅ Genesis instalado com sucesso!');
-  console.log('');
-  log('cyan', 'Próximos passos:');
-  console.log('  1. Abra Claude Code neste projeto');
-  console.log('  2. Digite: /genesis');
-  console.log('  3. O Genesis guia todo o resto');
-  console.log('');
-}
-
-function cmdGlobal(force) {
-  // Global = Claude Code commands at ~/.claude/commands/
-  const claudeCommandsDir = path.join(os.homedir(), '.claude', 'commands');
-  ensureDir(claudeCommandsDir);
-
-  log('cyan', '\nGenesis Framework — Instalação Global (Claude Code)');
-  log('cyan', '====================================================');
-  console.log(`\nInstalando em: ${c('yellow', claudeCommandsDir)}\n`);
-
-  log('green', 'Copiando commands globais...');
-
-  for (const skill of listSkills()) {
-    const srcFile  = path.join(SKILLS_SRC, skill, 'SKILL.md');
-    const destFile = path.join(claudeCommandsDir, `${skill}.md`);
-
-    if (fs.existsSync(destFile) && !force) {
-      log('gray', `  [SKIP] /${skill} — já existe`);
-      continue;
-    }
-    fs.copyFileSync(srcFile, destFile);
-    log('green', `  [OK]   /${skill}`);
-  }
-
-  console.log('');
-  log('green', '✅ Genesis instalado globalmente!');
-  console.log('');
-  log('cyan', 'Disponível em qualquer projeto no Claude Code:');
-  console.log('  Abra qualquer projeto → Digite /genesis');
-  console.log('');
-  log('yellow', 'Nota: para estado persistente por projeto, rode também:');
-  console.log('  npx github:rafaeldourado9/genesis-skill init [diretório]');
-  console.log('');
-}
-
-function cmdUpdate(targetDir, force) {
-  if (isGlobal) {
-    cmdGlobal(true);
-  } else {
-    cmdInit(targetDir, true);
+  } catch (error) {
+    console.error(`\nErro: ${error.message}`);
+    process.exitCode = 1;
   }
 }
 
-function cmdHelp() {
-  console.log('');
-  log('bold', `Genesis Framework  v${VERSION}`);
-  console.log('Framework multi-agente para construir software a partir de uma descrição.');
-  console.log('');
-  log('cyan', 'Uso:');
-  console.log('  npx github:rafaeldourado9/genesis-skill <comando> [opções]');
-  console.log('');
-  log('cyan', 'Comandos:');
-  console.log('  init [dir]    Instala no projeto (padrão: diretório atual)');
-  console.log('  global        Instala globalmente no Claude Code (~/.claude/commands/)');
-  console.log('  update        Atualiza skills para a versão atual');
-  console.log('  help          Mostra esta ajuda');
-  console.log('');
-  log('cyan', 'Opções:');
-  console.log('  --force, -f   Sobrescreve arquivos existentes');
-  console.log('  --global, -g  Instala globalmente (alias para "global")');
-  console.log('');
-  log('cyan', 'Exemplos:');
-  console.log('  npx github:rafaeldourado9/genesis-skill init');
-  console.log('  npx github:rafaeldourado9/genesis-skill init /caminho/do/projeto');
-  console.log('  npx github:rafaeldourado9/genesis-skill global');
-  console.log('  npx github:rafaeldourado9/genesis-skill init --force');
-  console.log('  npx github:rafaeldourado9/genesis-skill update --global');
-  console.log('');
-  log('cyan', 'Após instalar:');
-  console.log('  Abra Claude Code e digite /genesis');
-  console.log('');
-  console.log('  Documentação: https://github.com/rafaeldourado9/genesis-skill');
-  console.log('');
-}
+if (require.main === module) main();
 
-// ── Utility ──────────────────────────────────────────────────────────────────
-function copyDir(src, dest) {
-  ensureDir(dest);
-  for (const entry of fs.readdirSync(src)) {
-    const s = path.join(src, entry);
-    const d = path.join(dest, entry);
-    if (fs.statSync(s).isDirectory()) copyDir(s, d);
-    else fs.copyFileSync(s, d);
-  }
-}
-
-// ── Dispatch ─────────────────────────────────────────────────────────────────
-switch (cmd) {
-  case 'init':
-  case 'install':
-  case 'i': {
-    if (isGlobal) {
-      cmdGlobal(isForce);
-    } else {
-      cmdInit(targetArg || '.', isForce);
-    }
-    break;
-  }
-  case 'global':
-  case 'g':
-    cmdGlobal(isForce);
-    break;
-
-  case 'update':
-  case 'upgrade':
-  case 'u':
-    cmdUpdate(targetArg || '.', isForce);
-    break;
-
-  case 'help':
-  case '--help':
-  case '-h':
-  default:
-    cmdHelp();
-    break;
-}
+module.exports = { installGlobal, installProject };

@@ -58,6 +58,9 @@ jobs:
       - name: Check install.sh syntax
         run: bash -n install.sh && echo "✅ install.sh syntax OK"
 
+      - name: Test multi-runtime installer
+        run: npm test
+
       - name: Check all genesis agents are in README
         run: |
           echo "Checking README covers all agents..."

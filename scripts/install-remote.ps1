@@ -1,44 +1,20 @@
-# Genesis Framework — Instalador Remoto (Windows PowerShell)
-# Uso: iwr -useb https://raw.githubusercontent.com/rafaeldourado9/genesis-skill/main/scripts/install-remote.ps1 | iex
-# Ou:  iwr -useb ... | iex; Invoke-Genesis "C:\seu\projeto"
+# Genesis Framework remote installer for Windows
+# Usage: iwr -useb https://raw.githubusercontent.com/rafaeldourado9/genesis-skill/main/scripts/install-remote.ps1 | iex
 
-param([string]$Target = ".")
+param(
+    [string]$Target = ".",
+    [switch]$Global = $false
+)
 
-$Repo   = "rafaeldourado9/genesis-skill"
-$Branch = "main"
-
-Write-Host ""
-Write-Host "Genesis Framework — Instalando..." -ForegroundColor Cyan
-Write-Host ""
-
-# ── Método 1: npx (preferido) ────────────────────────────────────────────────
-$npx = Get-Command npx -ErrorAction SilentlyContinue
-if ($npx) {
-    Write-Host "Node.js detectado — usando npx" -ForegroundColor Green
-    Write-Host ""
-    & npx genesis-framework@latest init $Target
-    exit 0
+if (-not (Get-Command npx -ErrorAction SilentlyContinue)) {
+    Write-Error "Node.js 16+ com npx e necessario. Instale em https://nodejs.org"
+    exit 1
 }
 
-# ── Método 2: Invoke-WebRequest + Expand-Archive ─────────────────────────────
-Write-Host "Node.js não encontrado — baixando via PowerShell" -ForegroundColor Yellow
-
-$TmpDir = Join-Path $env:TEMP "genesis-install-$(Get-Random)"
-New-Item -ItemType Directory -Path $TmpDir | Out-Null
-
-try {
-    $ZipUrl  = "https://github.com/$Repo/archive/refs/heads/$Branch.zip"
-    $ZipPath = Join-Path $TmpDir "genesis.zip"
-    $ExtPath = Join-Path $TmpDir "extracted"
-
-    Write-Host "Baixando genesis@$Branch..."
-    Invoke-WebRequest -Uri $ZipUrl -OutFile $ZipPath -UseBasicParsing
-
-    Expand-Archive -Path $ZipPath -DestinationPath $ExtPath -Force
-    $ExtractedDir = Get-ChildItem $ExtPath -Directory | Select-Object -First 1
-
-    & powershell -NonInteractive -File (Join-Path $ExtractedDir.FullName "install.ps1") -ProjectPath $Target
+$Package = "github:rafaeldourado9/genesis-skill"
+if ($Global) {
+    & npx --yes $Package global
+} else {
+    & npx --yes $Package init $Target
 }
-finally {
-    Remove-Item -Recurse -Force $TmpDir -ErrorAction SilentlyContinue
-}
+exit $LASTEXITCODE

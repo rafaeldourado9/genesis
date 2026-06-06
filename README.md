@@ -7,7 +7,7 @@
 **Construa software production-ready a partir de uma descrição.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/rafaeldourado9/genesis-skill/releases)
+[![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](https://github.com/rafaeldourado9/genesis-skill/releases)
 [![npm](https://img.shields.io/npm/v/genesis-framework.svg)](https://www.npmjs.com/package/genesis-framework)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -44,7 +44,7 @@ npx github:rafaeldourado9/genesis-skill init
 # Instalar em um diretório específico
 npx github:rafaeldourado9/genesis-skill init /caminho/do/projeto
 
-# Instalar globalmente no Claude Code (qualquer projeto)
+# Instalar globalmente no Claude Code, Codex e OpenCode
 npx github:rafaeldourado9/genesis-skill global
 ```
 
@@ -92,15 +92,17 @@ D:\tools\genesis\install.ps1 -ProjectPath "C:\seu\projeto"
 
 ## Primeiros Passos
 
-Após instalar, abra seu LLM preferido no projeto e digite:
+Após instalar, use a ativação nativa do seu agente:
 
-```
-/genesis
-```
+| Agente | Ativação |
+|--------|----------|
+| Claude Code | `/genesis` |
+| OpenCode | `/genesis` |
+| Codex | `$genesis` ou `/skills` → `genesis` |
 
-Isso é tudo. O Genesis assume o controle a partir daí.
+O instalador cria automaticamente os adapters de cada runtime.
 
-> **Compatível com:** Claude Code · Cursor · Gemini CLI · Qualquer LLM com suporte a slash commands
+> **Compatível com:** Claude Code · Codex · OpenCode
 
 ---
 
@@ -108,12 +110,12 @@ Isso é tudo. O Genesis assume o controle a partir daí.
 
 | | Por Projeto (`init`) | Global (`global`) |
 |--|---------------------|-------------------|
-| **Onde instala** | `.agents/skills/` no projeto | `~/.claude/commands/` |
+| **Onde instala** | `.agents/skills/`, `.claude/skills/`, `.opencode/` | Pastas globais dos três agentes |
 | **Disponível em** | Apenas este projeto | Todos os projetos |
 | **Estado persistente** | Sim (`.genesis/state.json`) | Não (adicionar `init` também) |
 | **Quando usar** | Projeto específico, equipe | Uso pessoal, todos os projetos |
 
-**Recomendação para uso pessoal:** rode `global` uma vez e pronto.
+**Recomendação para uso pessoal:** rode `global` uma vez e reinicie sessões abertas dos agentes.
 
 ```bash
 npx genesis-framework global
@@ -330,22 +332,25 @@ Essas limitações são conhecidas e fazem parte do roadmap de melhoria.
 
 ## Compatibilidade
 
-O Genesis é um conjunto de arquivos de skill para agentes de IA. Funciona com qualquer runtime que suporte o formato `.agents/skills/`:
+O Genesis instala integrações nativas para:
 
-- [Claude Code](https://claude.ai/code) (recomendado)
-- [Cursor](https://cursor.sh)
-- [Gemini CLI](https://github.com/google-gemini/gemini-cli)
-- Qualquer LLM com suporte a slash commands customizados
+- Claude Code: `.claude/skills/`, com `/genesis`
+- Codex: `.agents/skills/`, com `$genesis` ou `/skills`
+- OpenCode: `.opencode/skills/` e `.opencode/commands/`, com `/genesis`
 
 ---
 
 ## Roadmap
 
-### v1.2 — Qualidade e diagnóstico (atual)
+### v1.4 — Instalação multi-runtime (atual)
 
-- [x] `genesis-inspector` — segurança frontend, mapa de telas/botões/bugs, sprint de fix
+- [x] Instalação automática no Claude Code, Codex e OpenCode
+- [x] Comando `/genesis` no Claude Code e OpenCode
+- [x] Ativação `$genesis`, `/skills` e `/prompts:genesis` no Codex
+- [x] Instalação global e por projeto com o mesmo CLI
+- [x] Testes automatizados dos adapters de cada runtime
 
-### v1.3 — Brownfield e domínios específicos (próximo)
+### v1.5 — Brownfield e domínios específicos (próximo)
 
 - [ ] `genesis-migrate` — planejador de migration para projetos brownfield complexos
 - [ ] Melhorar `genesis-scout` para codebases >50k linhas (amostragem dirigida)

@@ -1,6 +1,6 @@
 {
   "name": "genesis-framework",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Framework multi-agente para construir software production-ready a partir de uma descrição",
   "keywords": [
     "genesis",
@@ -15,7 +15,11 @@
   ],
   "license": "MIT",
   "bin": {
+    "genesis": "./bin/genesis.js",
     "genesis-framework": "./bin/genesis.js"
+  },
+  "scripts": {
+    "test": "node test/installer.test.js"
   },
   "files": [
     "bin/",
