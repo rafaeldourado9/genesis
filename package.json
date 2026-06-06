@@ -16,18 +16,20 @@
   "license": "MIT",
   "bin": {
     "genesis": "./bin/genesis.js",
-    "genesis-framework": "./bin/genesis.js"
+    "genesis-framework": "./bin/genesis.js",
+    "genesis-run": "./bin/genesis-run.js"
   },
   "scripts": {
     "test": "node test/installer.test.js"
   },
   "files": [
     "bin/",
+    "lib/",
     ".agents/",
     "templates/"
   ],
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "repository": {
     "type": "git",
